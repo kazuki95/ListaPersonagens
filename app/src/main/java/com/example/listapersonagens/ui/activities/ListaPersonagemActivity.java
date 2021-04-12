@@ -3,35 +3,43 @@ package com.example.listapersonagens.ui.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.listapersonagens.R;
 import com.example.listapersonagens.dao.PersonagemDAO;
+import com.example.listapersonagens.model.Personagem;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ListaPersonagemActivity extends AppCompatActivity {
 
+    private final PersonagemDAO dao = new PersonagemDAO();
+
+
+    //criando um override para a lista de personagens
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@NonNull Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_personagem);
+// setando o titulo
+        setTitle("Lista de Personagens");
+        dao.salvar(new Personagem("Ken","1,80","02041979"));
+        dao.salvar(new Personagem("Ryu","1,80","02041979"));
 
-        PersonagemDAO dao = new PersonagemDAO();
 
 
 // lista criada
      //   List<String> personagem = new ArrayList<>(Arrays.asList("Alex" , "Ken" , "Ryu" , "Guile" ));
 
 
-//botao possui a chamada setOnCLickListener que irá direcionar o usuario ao Formulario
+//pegando o FloatingActionButton que possui a chamada setOnCLickListener que irá direcionar o usuario ao Formulario
         FloatingActionButton botaoNovoPersonagem = findViewById(R.id.fab_add);
         botaoNovoPersonagem.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -39,20 +47,32 @@ public class ListaPersonagemActivity extends AppCompatActivity {
                 startActivity(new Intent(ListaPersonagemActivity.this, FormularioPersonagemActivity.class));
             }
         });
+    }
+// fazendo proteção aos dados para eles não apagarem quando der back no app
+    @Override
+    protected void onResume() {
+        super.onResume();
 
-// puxando a ID do app
         ListView listaDePersonagens = findViewById(R.id.activity_main_lista_personagem);
-        listaDePersonagens.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, dao.todos()));
+//referenciar dao.todos como personagem para acessar os dados
+        List<Personagem> personagens = dao.todos();
+//setando os personagens na lista no app
+        listaDePersonagens.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, personagens));
 
-     /* Codigo abaixo com Array Estatico
-        TextView primeiroPersonagem = findViewById(R.id.textView);
-        TextView segundoPersonagem = findViewById(R.id.textView2);
-        TextView terceiroPersonagem = findViewById(R.id.textView3);
+        listaDePersonagens.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//Metodo para seleção de personagem
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int posicao, long id) {
+                Personagem personagemEscolhido = personagens.get(posicao);
+//entrar no formulario
+                Intent vaiParaFormulario = new Intent(ListaPersonagemActivity.this, FormularioPersonagemActivity.class);
+                vaiParaFormulario.putExtra("personagem", personagemEscolhido);
+                startActivity(vaiParaFormulario);
 
-        primeiroPersonagem.setText(personagem.get(0));
-        segundoPersonagem.setText(personagem.get(1));
-        terceiroPersonagem.setText(personagem.get(2));
-     */
 
+
+
+            }
+        });
     }
 }
