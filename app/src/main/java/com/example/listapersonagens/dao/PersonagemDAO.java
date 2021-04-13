@@ -9,38 +9,48 @@ import java.util.List;
 public class PersonagemDAO {
 
     private final static List<Personagem> personagens = new ArrayList<>();
-//numerando personagens
-    private static int contadorDeId = 1;
 
-    public void salvar(Personagem personagemSalvo) {
+    private static int contadorDeId = 1; // atribuir contadorDeId para 1
+
+    public void salvar(Personagem personagemSalvo) { // salva item
+        personagemSalvo.setId(contadorDeId); // adicionando 1 item por personagem
 
 
-        personagemSalvo.setId(contadorDeId);
 //adiciona personagem
-        personagens.add(personagemSalvo);
-        contadorDeId++;
+        personagens.add(personagemSalvo); // adicionando personagem
+        atualizaID();
 
     }
-//codigo para edição do personagem
-    public void editar(Personagem personagem){
-        Personagem personagemEscolhido = null;
-        for (Personagem p:
-                personagens) {
-            if(p.getId() == personagem.getId()){
-                personagemEscolhido = p;
-            }
-        }
-        if(personagemEscolhido != null) {
-            int posicaoDoPersonagem = personagens.indexOf(personagemEscolhido);
+
+    private int atualizaID() {
+        return contadorDeId++; // soma 1
+    }
+
+    //codigo para edição do personagem
+    public void editar(Personagem personagem) {
+        Personagem personagemEscolhido = buscaPersonagemId(personagem);
+//caso seja diferente de nulo
+        if (personagemEscolhido != null) {
+            int posicaoDoPersonagem = personagens.indexOf(personagemEscolhido); // posicao do personagem
             personagens.set(posicaoDoPersonagem, personagem);
 
         }
-        
+
 
     }
 
-//criando lista
-    public List<Personagem> todos(){
+    private Personagem buscaPersonagemId(Personagem personagem) {
+        for (Personagem p :
+                personagens) { // for each para checar a lista
+            if (p.getId() == personagem.getId()) { // caso seja nulo
+                return p; // // armazenar informações
+            }
+        }
+        return null;
+    }
+
+    //criando lista
+    public List<Personagem> todos() {
 
         return new ArrayList<>(personagens);
 
