@@ -1,7 +1,11 @@
 package com.example.listapersonagens.ui.activities;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -24,6 +28,7 @@ public class ListaPersonagemActivity extends AppCompatActivity {
     // setando o titulo
     public static final String TITULO_APPBAR = "Lista de Personagens";
     private final PersonagemDAO dao = new PersonagemDAO();
+    private ArrayAdapter<Personagem> adapter;
 
 
     //criando um override para a lista de personagens
@@ -34,7 +39,7 @@ public class ListaPersonagemActivity extends AppCompatActivity {
         setContentView(R.layout.activity_lista_personagem);
         setTitle(TITULO_APPBAR);
         configuraFabNovoPersonagem();
-
+        configuraLista();
     }
 
     private void configuraFabNovoPersonagem() {
@@ -56,14 +61,74 @@ public class ListaPersonagemActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        atualizaPersonagem();
 
+    }
+
+    private void atualizaPersonagem() {
+//limpa lista
+        adapter.clear();
+//construir lista novamente
+        adapter.addAll(dao.todos());
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+//menu para remover item
+        super.onCreateContextMenu(menu, v, menuInfo);
+        getMenuInflater().inflate(R.menu.activity_lista_personagens_menu, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+
+        configuraMenu(item);
+
+//retorna valor atual para o ContextItem
+        return super.onContextItemSelected(item);
+    }
+
+    private void configuraMenu(@NonNull MenuItem item) {
+        //buscando titulo por id
+        int itemId = item.getItemId();
+
+//Se titulo do menu for Remover execute
+        if(itemId == R.id.activity_lista_personagem_menu_remover) {
+
+//pop ups perguntando se deseja deletar item
+            new AlertDialog.Builder(this)
+                    .setTitle("Removendo Personagem")
+                    .setMessage("Tem certeza que deseja remover?")
+// caso escolha SIM para deletar
+                    .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            AdapterView.AdapterContextMenuInfo menuInfo = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+//passar posição na lista
+                            Personagem personagemEscolhido = adapter.getItem(menuInfo.position);
+//remover o item
+                            adapter.remove(personagemEscolhido);
+                        }
+                    })
+//caso escolha NÃO para deletar
+                    .setNegativeButton("Não", null)
+//mostrar as janelas
+                    .show();
+
+
+        }
+    }
+
+    private void configuraLista() {
+//carrega listagem
         ListView listaDePersonagens = findViewById(R.id.activity_main_lista_personagem);
-//referenciar dao.todos como personagem para acessar os dados
-        final List<Personagem> personagens = dao.todos();
 
-        listaDePersonagens(listaDePersonagens, personagens);
-
+        listaDePersonagens(listaDePersonagens);
+//configuração do click
         configuraItemPorClique(listaDePersonagens);
+//registro aplicado dentro do conteudo
+        registerForContextMenu(listaDePersonagens);
     }
 
     private void configuraItemPorClique(ListView listaDePersonagens) {
@@ -80,14 +145,15 @@ public class ListaPersonagemActivity extends AppCompatActivity {
     }
 
     private void abreFormularioEditar(Personagem personagemEscolhido) {
-        //entrar no formulario
+//entrar no formulario
         Intent vaiParaFormulario = new Intent(ListaPersonagemActivity.this, FormularioPersonagemActivity.class);//ver formulario do personagem
         vaiParaFormulario.putExtra(CHAVE_PERSONAGEM, personagemEscolhido); // utilizando gets
         startActivity(vaiParaFormulario); // chama o formulário
     }
 
-    private void listaDePersonagens(ListView listaDePersonagens, List<Personagem> personagens) {
-        //setando os personagens na lista no app
-        listaDePersonagens.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, personagens));
+    private void listaDePersonagens(ListView listaDePersonagens) {
+//setando os personagens na lista no app
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+        listaDePersonagens.setAdapter(adapter);
     }
 }
