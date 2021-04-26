@@ -72,6 +72,14 @@ public class ListaPersonagemActivity extends AppCompatActivity {
         adapter.addAll(dao.todos());
     }
 
+    private void remove(Personagem personagem){
+//remover do dao
+        dao.remove(personagem);
+        adapter.remove(personagem);
+
+
+    }
+
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
 //menu para remover item
@@ -108,7 +116,7 @@ public class ListaPersonagemActivity extends AppCompatActivity {
 //passar posição na lista
                             Personagem personagemEscolhido = adapter.getItem(menuInfo.position);
 //remover o item
-                            adapter.remove(personagemEscolhido);
+                            remove(personagemEscolhido);
                         }
                     })
 //caso escolha NÃO para deletar

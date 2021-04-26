@@ -56,5 +56,16 @@ public class PersonagemDAO {
 
     }
 
+    public void remove(Personagem personagem){
+        Personagem personagemDevolvido = buscaPersonagemId(personagem);
+
+        if(personagemDevolvido != null){
+//removendo personagem escolhido caso seja diferente de nulo
+            personagens.remove(personagemDevolvido);
+
+        }
+
+
+    }
 
 }
